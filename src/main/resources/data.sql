@@ -1,20 +1,18 @@
 INSERT INTO User (username, password, role)
-VALUES ('admin', 'admin', 'admin');
-INSERT INTO User (username, password, role)
 VALUES ('defaultUser', 'defaultUser', 'user');
 INSERT INTO User (username, password, role)
 VALUES ('newUser', 'newUser', 'user');
 
 INSERT INTO Contact (avatar, name, phoneNumber, userId)
-VALUES ('zf.png', 'defaultName', 'defaultPhoneNumber', 2);
+VALUES ('旺仔1.png', 'defaultName0', 'defaultPhoneNumber0', 1);
 INSERT INTO Contact (avatar, name, phoneNumber, userId)
-VALUES ('zhy.png', 'defaultNam2', 'defaultPhoneNumber', 3);
+VALUES ('旺仔2.png', 'defaultName1', 'defaultPhoneNumber1', 2);
 INSERT INTO Contact (avatar, name, phoneNumber, userId)
-VALUES ('zpc1.png', 'defaultNam3', 'defaultPhoneNumber', 3);
+VALUES ('defaultPictrue.png', 'defaultName2', 'defaultPhoneNumber2', 2);
 INSERT INTO Contact (avatar, name, phoneNumber, userId)
-VALUES ('zpc2.png', 'defaultNam4', 'defaultPhoneNumber', 2);
+VALUES ('Gundam.png', 'defaultName3', 'defaultPhoneNumber3', 1);
 
 INSERT INTO Message (content, fromUserId, toUserId, fromUserName, toUserName)
-VALUES ('你好', 2, 3, 'defaultUser', 'newUser');
+VALUES ('你好', 1, 2, 'defaultUser', 'newUser');
 INSERT INTO Message (content, fromUserId, toUserId, fromUserName, toUserName)
-VALUES ('你也好', 3, 2, 'newUser', 'defaultUser');
+VALUES ('你也好', 2, 1, 'newUser', 'defaultUser');
