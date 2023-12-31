@@ -13,6 +13,7 @@
 <body>
 <div id="app">
     <h2>管理员：消息管理界面</h2>
+    <input placeholder="搜索消息" type="text" v-model="searchKeyword">
     <table class="table">
         <thead>
         <tr>
@@ -23,7 +24,7 @@
         </tr>
         </thead>
         <tbody>
-        <tr v-for="message in messages" v-if="messages.length > 0">
+        <tr v-for="message in filteredMessages" v-if="filteredMessages.length > 0">
             <td v-text="message.fromUserName"></td>
             <td v-text="message.toUserName"></td>
             <td v-text="message.content"></td>
@@ -89,7 +90,8 @@
         el: '#app',
         data: {
             messages: [],
-            currentMessage: {}
+            currentMessage: {},
+            searchKeyword: ''  // 添加新的data属性
         },
         created() {
             this.refreshMessages();
@@ -140,6 +142,20 @@
                     .catch(error => {
                         console.log(error);
                     });
+            }
+        },
+        computed: {
+            // 修改过滤逻辑
+            filteredMessages() {
+                if (this.searchKeyword === '') {
+                    return this.messages;
+                } else {
+                    return this.messages.filter(message =>
+                        message.content.includes(this.searchKeyword) ||
+                        message.fromUserName.includes(this.searchKeyword) ||
+                        message.toUserName.includes(this.searchKeyword)
+                    );
+                }
             }
         }
     });
