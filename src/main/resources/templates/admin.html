@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Admin</title>
+    <link rel="stylesheet" href="https://cdn.staticfile.org/twitter-bootstrap/4.3.1/css/bootstrap.min.css">
+    <script src="https://cdn.staticfile.org/jquery/3.2.1/jquery.min.js"></script>
+    <script src="https://cdn.staticfile.org/popper.js/1.15.0/umd/popper.min.js"></script>
+    <script src="https://cdn.staticfile.org/twitter-bootstrap/4.3.1/js/bootstrap.min.js"></script>
+    <script src="https://cdn.bootcdn.net/ajax/libs/axios/1.1.3/axios.min.js"></script>
+    <script src="https://cdn.bootcdn.net/ajax/libs/vue/2.6.11/vue.min.js"></script>
+</head>
+<body>
+<h2>管理员：消息管理界面</h2>
+<table class="table">
+    <thead>
+    <tr>
+        <th>发送者用户名</th>
+        <th>接收者用户名</th>
+        <th>短信内容</th>
+        <th>操作</th>
+    </tr>
+    </thead>
+    <tbody>
+    <tr v-for="message in messages" v-if="messages.length > 0">
+        <td v-text="message.fromUserName"></td>
+        <td v-text="message.toUserName"></td>
+        <td v-text="message.content"></td>
+        <td>
+            <button class="btn btn-primary" @click="openEditModal(message)">编辑</button>
+            <button class="btn btn-danger" @click="openDeleteModal(message)">删除</button>
+        </td>
+    </tr>
+    </tbody>
+</table>
+<!-- 编辑消息的模态框 -->
+<div class="modal fade" id="editMessageModal" tabindex="-1" role="dialog" aria-labelledby="editMessageModalLabel"
+     aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="editMessageModalLabel">编辑消息</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <form>
+                    <div class="form-group">
+                        <label for="messageContent">消息内容</label>
+                        <textarea id="messageContent" v-model="currentMessage.content" class="form-control"></textarea>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">关闭</button>
+                <button type="button" class="btn btn-primary" @click="saveMessage">保存</button>
+            </div>
+        </div>
+    </div>
+</div>
+<!-- 删除消息的模态框 -->
+<div class="modal fade" id="deleteMessageModal" tabindex="-1" role="dialog" aria-labelledby="deleteMessageModalLabel"
+     aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="deleteMessageModalLabel">删除消息</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                确定要删除这个消息吗？
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">取消</button>
+                <button type="button" class="btn btn-danger" @click="deleteMessage">删除</button>
+            </div>
+        </div>
+    </div>
+</div>
+<script>
+    var app = new Vue({
+        el: 'body',
+        data: {
+            messages: [],
+            currentMessage: {}
+        },
+        created() {
+            this.refreshMessages();
+        },
+        methods: {
+            refreshMessages() {
+                axios.get('/api/allMessages')
+                    .then(response => {
+                        console.log("Received messages: ", response.data);  // 添加日志以检查接收到的消息
+                        this.messages = response.data;
+                    })
+                    .catch(error => {
+                        console.log(error);
+                    });
+            },
+            openEditModal(message) {
+                this.currentMessage = Object.assign({}, message);
+                $('#editMessageModal').modal('show');
+            },
+            openDeleteModal(message) {
+                this.currentMessage = Object.assign({}, message);
+                $('#deleteMessageModal').modal('show');
+            },
+            saveMessage() {
+                axios.post('/api/editMessage', this.currentMessage)
+                    .then(response => {
+                        if (response.data.success) {
+                            this.refreshMessages();
+                            $('#editMessageModal').modal('hide');
+                        } else {
+                            console.log('保存消息失败');
+                        }
+                    })
+                    .catch(error => {
+                        console.log(error);
+                    });
+            },
+            deleteMessage() {
+                axios.post('/api/deleteMessage', this.currentMessage)
+                    .then(response => {
+                        if (response.data.success) {
+                            this.refreshMessages();
+                            $('#deleteMessageModal').modal('hide');
+                        } else {
+                            console.log('删除消息失败');
+                        }
+                    })
+                    .catch(error => {
+                        console.log(error);
+                    });
+            }
+        }
+    });
+</script>
+</body>
+</html>

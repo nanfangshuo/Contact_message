@@ -72,5 +72,8 @@ public class LoginController {
         return "welcome";
     }
 
-
+    @GetMapping("/admin")
+    public String admin() {
+        return "admin";
+    }
 }

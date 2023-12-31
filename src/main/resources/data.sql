@@ -2,6 +2,8 @@ INSERT INTO User (username, password, role)
 VALUES ('defaultUser', 'defaultUser', 'user');
 INSERT INTO User (username, password, role)
 VALUES ('newUser', 'newUser', 'user');
+INSERT INTO User (username, password, role)
+VALUES ('admin', 'admin', 'admin');
 
 INSERT INTO Contact (avatar, name, phoneNumber, userId)
 VALUES ('旺仔1.png', 'defaultName0', 'defaultPhoneNumber0', 1);

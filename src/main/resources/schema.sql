@@ -16,7 +16,6 @@ CREATE TABLE `Contact`
     `avatar`      varchar(255) DEFAULT NULL,
     `name`        varchar(255) DEFAULT NULL,
     `phoneNumber` varchar(255) DEFAULT NULL,
-
     `userId`      bigint(20) DEFAULT NULL,
     PRIMARY KEY (`id`)
 );
