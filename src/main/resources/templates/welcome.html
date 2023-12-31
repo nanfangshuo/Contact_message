@@ -1,0 +1,358 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Welcome</title>
+    <!-- 新 Bootstrap4 核心 CSS 文件 -->
+    <link rel="stylesheet" href="https://cdn.staticfile.org/twitter-bootstrap/4.3.1/css/bootstrap.min.css">
+
+    <!-- jQuery文件。务必在bootstrap.min.js 之前引入 -->
+    <script src="https://cdn.staticfile.org/jquery/3.2.1/jquery.min.js"></script>
+
+    <!-- bootstrap.bundle.min.js 用于弹窗、提示、下拉菜单，包含了 popper.min.js -->
+    <script src="https://cdn.staticfile.org/popper.js/1.15.0/umd/popper.min.js"></script>
+
+    <!-- 最新的 Bootstrap4 核心 JavaScript 文件 -->
+    <script src="https://cdn.staticfile.org/twitter-bootstrap/4.3.1/js/bootstrap.min.js"></script>
+
+    <script src="https://cdn.bootcdn.net/ajax/libs/axios/1.1.3/axios.min.js"></script>
+    <script src="https://cdn.bootcdn.net/ajax/libs/vue/2.6.11/vue.min.js"></script>
+</head>
+<body>
+<div class="container" id="app">
+    <h2>Welcome, <span v-text="username"></span></h2>
+    <h3>消息列表</h3>
+    <!-- 发送消息的按钮 -->
+    <button class="btn btn-primary" data-toggle="modal" data-target="#sendMessageModal"
+            style="width: 20%; margin-bottom: 20px;">发送消息
+    </button>
+    <!-- 一个表格 显示收到的消息 -->
+    <table class="table">
+        <thead>
+        <tr>
+            <th>发送者用户名</th>
+            <th>消息内容</th>
+        </tr>
+        </thead>
+        <tr v-for="message in messages">
+            <td v-text="message.fromUserName"></td>
+            <td v-text="message.content"></td>
+        </tr>
+    </table>
+    <hr>
+    <h3>联系人列表</h3>
+    <div class="d-flex justify-content-between mb-3">
+        <div class="d-flex">
+            <input type="text" v-model="searchKeyword" placeholder="搜索联系人" class="form-control mr-2"
+                   style="width: 100%;">
+            <button @click="searchContact" class="btn btn-primary" style="width: 30%;">搜索</button>
+        </div>
+        <button class="btn btn-primary" data-toggle="modal" data-target="#addContactModal" style="width: 20%;">
+            添加联系人
+        </button>
+    </div>
+    <table class="table">
+        <thead>
+        <tr>
+            <th>头像</th>
+            <th>姓名</th>
+            <th>电话</th>
+            <th>操作</th>
+        </tr>
+
+        </thead>
+        <tbody>
+        <tr v-for="contact in contacts">
+            <td><img :src="'/pictures/' + contact.avatar" alt="Default Picture" width="100" height="100"></td>
+            <td v-text="contact.name"></td>
+            <td v-text="contact.phoneNumber"></td>
+            <td>
+                <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#editContactModal"
+                        @click="openEditModal(contact)">编辑
+                </button>
+                <button type="button" class="btn btn-danger" data-toggle="modal" data-target="#deleteContactModal"
+                        @click="openDeleteModal(contact)">删除
+                </button>
+            </td>
+        </tr>
+        </tbody>
+    </table>
+    <!-- 编辑联系人的模态框 -->
+    <div class="modal fade" id="editContactModal" tabindex="-1" role="dialog" aria-labelledby="editContactModalLabel"
+         aria-hidden="true">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="editContactModalLabel">编辑联系人</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <form>
+                        <div class="form-group">
+                            <label for="avatar">头像</label>
+                            <input type="text" id="avatar" v-model="currentContact.avatar" class="form-control">
+                        </div>
+                        <div class="form-group">
+                            <label for="name">姓名</label>
+                            <input type="text" id="name" v-model="currentContact.name" class="form-control">
+                        </div>
+                        <div class="form-group">
+                            <label for="phoneNumber">电话</label>
+                            <input type="text" id="phoneNumber" v-model="currentContact.phoneNumber"
+                                   class="form-control">
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">关闭</button>
+                    <button type="button" class="btn btn-primary" @click="saveContact">保存</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 删除联系人的模态框 -->
+    <div class="modal fade" id="deleteContactModal" tabindex="-1" role="dialog"
+         aria-labelledby="deleteContactModalLabel" aria-hidden="true">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="deleteContactModalLabel">删除联系人</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    确定要删除这个联系人吗？
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">取消</button>
+                    <button type="button" class="btn btn-danger" @click="deleteContact">删除</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- 添加联系人的模态框 -->
+    <div class="modal fade" id="addContactModal" tabindex="-1" role="dialog" aria-labelledby="addContactModalLabel"
+         aria-hidden="true">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="addContactModalLabel">添加联系人</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <form>
+                        <div class="form-group">
+                            <label for="newAvatar">头像</label>
+                            <input type="text" id="newAvatar" v-model="newContact.avatar" class="form-control">
+                        </div>
+                        <div class="form-group">
+                            <label for="newName">姓名</label>
+                            <input type="text" id="newName" v-model="newContact.name" class="form-control">
+                        </div>
+                        <div class="form-group">
+                            <label for="newPhoneNumber">电话</label>
+                            <input type="text" id="newPhoneNumber" v-model="newContact.phoneNumber"
+                                   class="form-control">
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">关闭</button>
+                    <button type="button" class="btn btn-primary" @click="addContact">添加</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- 发送消息的模态框 -->
+    <div class="modal fade" id="sendMessageModal" tabindex="-1" role="dialog" aria-labelledby="sendMessageModalLabel"
+         aria-hidden="true">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="sendMessageModalLabel">发送消息</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <form>
+                        <div class="form-group">
+                            <label for="receiver">接收者用户名</label>
+                            <input type="text" id="receiver" v-model="newMessage.toUserName" class="form-control">
+                        </div>
+                        <div class="form-group">
+                            <label for="messageContent">消息内容</label>
+                            <textarea id="messageContent" v-model="newMessage.content" class="form-control"></textarea>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">关闭</button>
+                    <button type="button" class="btn btn-primary" @click="sendMessage">发送</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<script>
+    var app = new Vue({
+        el: '#app',
+        data: {
+            username: '',
+            contacts: [],
+            currentContact: {},  // 当前正在编辑或删除的联系人
+            newContact: {},// 新添加的联系人
+            searchKeyword: '',
+            messages: [],  // 当前用户收到的所有消息
+            newMessage: {}  // 新的消息
+        },
+        created() {
+            // 获取当前登录的用户名
+            axios.get('/api/currentUser')
+                .then(response => {
+                    this.username = response.data.username;
+                })
+                .catch(error => {
+                    console.log(error);
+                });
+
+            // 获取联系人数据
+            axios.get('/api/contacts')
+                .then(response => {
+                    this.contacts = response.data;
+                })
+                .catch(error => {
+                    console.log(error);
+                });
+            // 获取消息数据
+            axios.get('/api/messages')
+                .then(response => {
+                    this.messages = response.data;
+                })
+                .catch(error => {
+                    console.log(error);
+                });
+        },
+        methods: {
+            openEditModal(contact) {
+                // 打开编辑联系人的模态框，并将要编辑的联系人的信息填充到表单中
+                this.currentContact = contact;
+                $('#editContactModal').modal('show');
+            },
+            openDeleteModal(contact) {
+                // 打开删除联系人的模态框，并保存要删除的联系人的信息
+                this.currentContact = contact;
+                $('#deleteContactModal').modal('show');
+            },
+            saveContact() {
+                // 保存编辑后的联系人信息，并关闭模态框
+                axios.post('/api/editContact', this.currentContact)
+                    .then(response => {
+                        if (response.data.success) {
+                            // 更新联系人列表
+                            this.contacts = this.contacts.map(contact =>
+                                contact.name === this.currentContact.name ? this.currentContact : contact
+                            );
+                            // 关闭模态框
+                            $('#editContactModal').modal('hide');
+                        } else {
+                            console.log('保存联系人失败');
+                        }
+                    })
+                    .catch(error => {
+                        console.log(error);
+                    });
+            },
+            deleteContact() {
+                // 删除联系人，并关闭模态框
+                axios.post('/api/deleteContact', this.currentContact)
+                    .then(response => {
+                        if (response.data.success) {
+                            // 从联系人列表中移除这个联系人
+                            this.contacts = this.contacts.filter(contact =>
+                                contact.name !== this.currentContact.name
+                            );
+                            // 关闭模态框
+                            $('#deleteContactModal').modal('hide');
+                        } else {
+                            console.log('删除联系人失败');
+                        }
+                    })
+                    .catch(error => {
+                        console.log(error);
+                    });
+            },
+            addContact() {
+                // 添加新的联系人，并关闭模态框
+                axios.post('/api/addContact', this.newContact)
+                    .then(response => {
+                        if (response.data.success) {
+                            // 将新联系人添加到联系人列表中
+                            this.contacts.push(this.newContact);
+                            // 清空表单
+                            this.newContact = {};
+                            // 关闭模态框
+                            $('#addContactModal').modal('hide');
+                        } else {
+                            console.log('添加联系人失败');
+                        }
+                    })
+                    .catch(error => {
+                        console.log(error);
+                    });
+            },
+            searchContact() {
+                // 发送搜索请求
+                axios.get('/api/searchContact', {
+                    params: {
+                        keyword: this.searchKeyword
+                    }
+                })
+                    .then(response => {
+                        // 更新联系人列表
+                        this.contacts = response.data;
+                    })
+                    .catch(error => {
+                        console.log(error);
+                    });
+            },
+            sendMessage() {
+                // 验证 this.newMessage 是否包含所有必要的字段
+                if (!this.newMessage.toUserName || !this.newMessage.content) {
+                    console.log(this.newMessage.toUserName);
+                    console.log(this.newMessage.content);
+                    console.log('发送消息失败：缺少必要的字段');
+                    return;
+                }
+
+                // 发送新的消息，并关闭模态框
+                axios.post('/api/sendMessage', this.newMessage)
+                    .then(response => {
+                        if (response.data.success) {
+                            // 只有当消息是发送给当前用户的时候，才将其添加到 messages 数组中
+                            if (this.newMessage.toUserName === this.username) {
+                                this.messages.push(this.newMessage);
+                            }
+                            // 清空表单
+                            this.newMessage = {};
+                            // 关闭模态框
+                            $('#sendMessageModal').modal('hide');
+                        } else {
+                            console.log('发送消息失败');
+                        }
+                    })
+                    .catch(error => {
+                        console.log(error);
+                    });
+            }
+        }
+    });
+</script>
+</body>
+</html>
